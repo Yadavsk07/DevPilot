@@ -57,7 +57,7 @@ jobs:
         run: |
           docker build \
             -t ${{ secrets.DOCKERHUB_USERNAME }}/devpilot-backend:latest \
-            .
+            ./backend
 
       - name: Push Docker image
         run: |
