@@ -16,6 +16,7 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
+import org.springframework.web.cors.CorsConfigurationSource;
 import devPilot.backend.security.GithubOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final GithubOAuth2UserService gitHubOAuth2UserService;
+    private final CorsConfigurationSource corsConfigurationSource;
 
     @Bean
     SecurityFilterChain securityFilterChain(
@@ -32,7 +34,7 @@ public class SecurityConfig {
             AuthenticationSuccessHandler oauth2SuccessHandler,
             AuthenticationFailureHandler oauth2FailureHandler) throws Exception {
         http
-                .cors(Customizer.withDefaults())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
@@ -66,17 +68,19 @@ public class SecurityConfig {
 
     @Bean
     AuthenticationSuccessHandler oauth2SuccessHandler(
-            @Value("${app.frontend-url}") String frontendUrl) {
+            @Value("${app.frontend-url:https://gitdevpilot.netlify.app}") String frontendUrl) {
         SimpleUrlAuthenticationSuccessHandler handler = new SimpleUrlAuthenticationSuccessHandler();
-        handler.setDefaultTargetUrl(frontendUrl + "/auth/callback");
+        String targetBase = frontendUrl.replaceAll("/+$", "");
+        handler.setDefaultTargetUrl(targetBase + "/auth/callback");
         return handler;
     }
 
     @Bean
     AuthenticationFailureHandler oauth2FailureHandler(
-            @Value("${app.frontend-url}") String frontendUrl) {
+            @Value("${app.frontend-url:https://gitdevpilot.netlify.app}") String frontendUrl) {
         SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler();
-        handler.setDefaultFailureUrl(frontendUrl + "/login?error=oauth_failed");
+        String targetBase = frontendUrl.replaceAll("/+$", "");
+        handler.setDefaultFailureUrl(targetBase + "/login?error=oauth_failed");
         return handler;
     }
 }
