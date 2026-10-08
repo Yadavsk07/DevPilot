@@ -30,7 +30,7 @@ jobs:
 
       - name: Build and test application
         working-directory: ./backend
-        run: mvn clean package -DskipTests=false
+        run: mvn clean package -DskipTests
 
 
   # ==========================================================
